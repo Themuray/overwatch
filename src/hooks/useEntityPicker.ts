@@ -11,7 +11,7 @@ export function useEntityPicker(viewer: Cesium.Viewer | null) {
   const setSelectedEntity = useOverwatchStore((s) => s.setSelectedEntity)
 
   useEffect(() => {
-    if (!viewer) return
+    if (!viewer || viewer.isDestroyed()) return
 
     const handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas)
 

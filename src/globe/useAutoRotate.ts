@@ -9,7 +9,7 @@ export function useAutoRotate(viewer: Cesium.Viewer | null) {
 
   // Globe rotation via clock tick
   useEffect(() => {
-    if (!viewer) return
+    if (!viewer || viewer.isDestroyed()) return
 
     const tick = () => {
       if (isAutoRotating) {
@@ -25,7 +25,7 @@ export function useAutoRotate(viewer: Cesium.Viewer | null) {
 
   // Pause on pointer interaction, resume after 3s
   useEffect(() => {
-    if (!viewer) return
+    if (!viewer || viewer.isDestroyed()) return
 
     const canvas = viewer.scene.canvas
 

@@ -5,7 +5,7 @@ import { useOverwatchStore } from '../store/useOverwatchStore'
 export const INITIAL_DESTINATION = Cesium.Cartesian3.fromDegrees(0, 20, 20_000_000)
 export const INITIAL_ORIENTATION = {
   heading: 0,
-  pitch: Cesium.Math.toRadians(-25),
+  pitch: Cesium.Math.toRadians(-90),
   roll: 0,
 }
 

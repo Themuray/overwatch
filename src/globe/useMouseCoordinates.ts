@@ -6,7 +6,7 @@ export function useMouseCoordinates(viewer: Cesium.Viewer | null) {
   const setCoordinates = useOverwatchStore((s) => s.setCoordinates)
 
   useEffect(() => {
-    if (!viewer) return
+    if (!viewer || viewer.isDestroyed()) return
 
     const handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas)
 
