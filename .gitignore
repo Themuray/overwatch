@@ -25,3 +25,6 @@ dist-ssr
 
 # Environment
 .env
+
+# Scratch/debug files
+public/test.html
