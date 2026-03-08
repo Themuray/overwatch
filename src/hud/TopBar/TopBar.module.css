@@ -1,0 +1,46 @@
+.topBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px;
+  background: rgba(6, 6, 8, 0.8);
+  border-bottom: 1px solid var(--color-border);
+  backdrop-filter: blur(4px);
+  pointer-events: auto;
+}
+
+.title {
+  font-size: 20px;
+  letter-spacing: 0.3em;
+  color: var(--color-amber);
+  text-shadow: var(--glow-amber);
+  font-weight: normal;
+}
+
+.center {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.clockLabel {
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  color: var(--color-amber-dim);
+}
+
+.clock {
+  font-size: 16px;
+  color: var(--color-cyan);
+  text-shadow: var(--glow-cyan);
+  letter-spacing: 0.1em;
+  min-width: 6ch;
+  text-align: center;
+}
+
+.classification {
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  color: var(--color-green);
+  text-shadow: var(--glow-green);
+}

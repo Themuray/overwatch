@@ -1,0 +1,40 @@
+.dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  animation: pulse 1.5s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+.green {
+  background: var(--color-green);
+  box-shadow: var(--glow-green);
+  animation-name: pulseGreen;
+}
+
+.amber {
+  background: var(--color-amber);
+  box-shadow: var(--glow-amber);
+  animation-name: pulseAmber;
+}
+
+.red {
+  background: var(--color-red);
+  animation-name: pulseRed;
+}
+
+@keyframes pulseGreen {
+  0%, 100% { opacity: 1; box-shadow: var(--glow-green); }
+  50% { opacity: 0.3; box-shadow: none; }
+}
+
+@keyframes pulseAmber {
+  0%, 100% { opacity: 1; box-shadow: var(--glow-amber); }
+  50% { opacity: 0.3; box-shadow: none; }
+}
+
+@keyframes pulseRed {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}

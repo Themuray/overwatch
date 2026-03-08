@@ -1,0 +1,28 @@
+.bottomBar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 20px;
+  background: rgba(6, 6, 8, 0.8);
+  border-top: 1px solid var(--color-border);
+  backdrop-filter: blur(4px);
+  pointer-events: auto;
+}
+
+.label {
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  color: var(--color-amber-dim);
+}
+
+.value {
+  font-size: 13px;
+  color: var(--color-amber);
+  min-width: 10ch;
+  letter-spacing: 0.05em;
+}
+
+.sep {
+  color: var(--color-border);
+  margin: 0 4px;
+}

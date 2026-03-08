@@ -1,0 +1,11 @@
+.container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.container :global(.cesium-widget),
+.container :global(.cesium-widget canvas) {
+  width: 100% !important;
+  height: 100% !important;
+}

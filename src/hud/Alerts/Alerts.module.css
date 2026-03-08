@@ -1,0 +1,51 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  pointer-events: auto;
+  max-width: 380px;
+}
+
+.alert {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  background: rgba(6, 6, 8, 0.88);
+  border: 1px solid var(--color-border);
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.2s ease;
+}
+
+.prefix {
+  font-size: 11px;
+  flex-shrink: 0;
+}
+
+.message {
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  flex: 1;
+}
+
+.close {
+  background: none;
+  border: none;
+  color: var(--color-amber-dim);
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  padding: 0 2px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.close:hover { color: var(--color-amber); }
+
+/* Types */
+.info { border-color: rgba(0, 212, 255, 0.25); color: var(--color-cyan); }
+.info .prefix { color: var(--color-cyan); }
+.warn { border-color: rgba(255, 176, 0, 0.35); color: var(--color-amber); }
+.warn .prefix { color: var(--color-amber); }
+.error { border-color: rgba(255, 51, 51, 0.35); color: var(--color-red); }
+.error .prefix { color: var(--color-red); }
