@@ -2,6 +2,7 @@ import { useEffect, useRef, useContext } from 'react'
 import * as Cesium from 'cesium'
 import { CesiumContext } from '../globe/CesiumContext'
 import { useOverwatchStore } from '../store/useOverwatchStore'
+import { SAT_ICON, SAT_ICON_SELECTED } from '../assets/icons'
 import {
   fetchSatellitePositions,
   updateSatellitePositions,
@@ -11,9 +12,7 @@ import {
 const FETCH_INTERVAL_MS = 300_000  // re-fetch TLEs every 5 minutes
 const UPDATE_INTERVAL_MS = 5_000   // re-propagate positions every 5s
 const SOURCE_NAME = 'satellites'
-const SAT_COLOR = Cesium.Color.fromCssColorString('#00FF41').withAlpha(0.9)
 const LABEL_COLOR = Cesium.Color.fromCssColorString('#00FF41').withAlpha(0.7)
-const SELECTED_COLOR = Cesium.Color.fromCssColorString('#FFB000').withAlpha(1.0)
 
 function buildSatEntity(sat: SatellitePosition, isSelected: boolean): Cesium.Entity {
   const position = Cesium.Cartesian3.fromDegrees(
@@ -25,12 +24,10 @@ function buildSatEntity(sat: SatellitePosition, isSelected: boolean): Cesium.Ent
   return new Cesium.Entity({
     id: sat.id,
     position,
-    point: new Cesium.PointGraphics({
-      color: isSelected ? SELECTED_COLOR : SAT_COLOR,
-      pixelSize: isSelected ? 8 : 5,
-      outlineColor: Cesium.Color.fromCssColorString('#003300'),
-      outlineWidth: 1,
-      disableDepthTestDistance: Number.POSITIVE_INFINITY,
+    billboard: new Cesium.BillboardGraphics({
+      image: isSelected ? SAT_ICON_SELECTED : SAT_ICON,
+      scale: isSelected ? 0.6 : 0.4,
+      scaleByDistance: new Cesium.NearFarScalar(5_000_000, 1.0, 30_000_000, 0.4),
     }),
     label: new Cesium.LabelGraphics({
       text: sat.name,
@@ -43,7 +40,6 @@ function buildSatEntity(sat: SatellitePosition, isSelected: boolean): Cesium.Ent
       horizontalOrigin: Cesium.HorizontalOrigin.LEFT,
       verticalOrigin: Cesium.VerticalOrigin.CENTER,
       distanceDisplayCondition: new Cesium.DistanceDisplayCondition(0, 10_000_000),
-      disableDepthTestDistance: Number.POSITIVE_INFINITY,
     }),
     properties: new Cesium.PropertyBag({
       type: 'satellite',
@@ -64,6 +60,7 @@ export function SatelliteLayer() {
   const setEntityCount = useOverwatchStore((s) => s.setEntityCount)
   const setLastUpdated = useOverwatchStore((s) => s.setLastUpdated)
   const addAlert = useOverwatchStore((s) => s.addAlert)
+  const updateEntityIndex = useOverwatchStore((s) => s.updateEntityIndex)
   const dataSourceRef = useRef<Cesium.CustomDataSource | null>(null)
   const satsRef = useRef<SatellitePosition[]>([])
   const fetchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -96,10 +93,10 @@ export function SatelliteLayer() {
     if (!ds) return
     for (const sat of satsRef.current) {
       const entity = ds.entities.getById(sat.id)
-      if (!entity?.point) continue
+      if (!entity?.billboard) continue
       const isSelected = sat.id === selectedEntityId
-      entity.point.color = new Cesium.ConstantProperty(isSelected ? SELECTED_COLOR : SAT_COLOR)
-      entity.point.pixelSize = new Cesium.ConstantProperty(isSelected ? 8 : 5)
+      entity.billboard.image = new Cesium.ConstantProperty(isSelected ? SAT_ICON_SELECTED : SAT_ICON)
+      entity.billboard.scale = new Cesium.ConstantProperty(isSelected ? 0.6 : 0.4)
     }
   }, [selectedEntityId])
 
@@ -124,6 +121,15 @@ export function SatelliteLayer() {
         ds.entities.resumeEvents()
         setEntityCount('satellites', sats.length)
         setLastUpdated('satellites', Date.now())
+
+        // Update entity index for search
+        updateEntityIndex('satellite', sats.map(sat => ({
+          entityId: sat.id,
+          name: sat.name,
+          type: 'satellite',
+          position: { lon: sat.longitude, lat: sat.latitude, alt: sat.altitudeKm * 1000 },
+        })))
+
         addAlert(`SATELLITES NOMINAL — ${sats.length} TRACKED`, 'info')
       } catch {
         addAlert('SATELLITE TLE FETCH FAILED', 'error')

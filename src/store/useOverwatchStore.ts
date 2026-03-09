@@ -6,7 +6,7 @@ interface Coordinates {
   alt: number | null
 }
 
-type LayerKey = 'flights' | 'ships' | 'satellites'
+type LayerKey = 'flights' | 'ships' | 'satellites' | 'grid' | 'heatmap'
 
 export interface EntityDetail {
   label: string
@@ -26,6 +26,13 @@ export interface Alert {
   message: string
   type: 'info' | 'warn' | 'error'
   timestamp: number
+}
+
+export interface EntityIndexEntry {
+  entityId: string
+  name: string
+  type: string
+  position?: { lon: number; lat: number; alt: number }
 }
 
 interface OverwatchStore {
@@ -57,6 +64,21 @@ interface OverwatchStore {
   alerts: Alert[]
   addAlert: (message: string, type?: Alert['type']) => void
   dismissAlert: (id: string) => void
+
+  showCheatsheet: boolean
+  toggleCheatsheet: () => void
+
+  showSearch: boolean
+  setShowSearch: (v: boolean) => void
+
+  entityIndex: EntityIndexEntry[]
+  updateEntityIndex: (type: string, entries: EntityIndexEntry[]) => void
+
+  followEntityId: string | null
+  setFollowEntity: (id: string | null) => void
+
+  showMinimap: boolean
+  toggleMinimap: () => void
 }
 
 let alertCounter = 0
@@ -68,15 +90,15 @@ export const useOverwatchStore = create<OverwatchStore>((set) => ({
   coordinates: { lat: null, lng: null, alt: null },
   setCoordinates: (c) => set({ coordinates: c }),
 
-  layers: { flights: false, ships: false, satellites: false },
+  layers: { flights: false, ships: false, satellites: false, grid: false, heatmap: false },
   toggleLayer: (l) =>
     set((state) => ({ layers: { ...state.layers, [l]: !state.layers[l] } })),
 
-  entityCounts: { flights: 0, ships: 0, satellites: 0 },
+  entityCounts: { flights: 0, ships: 0, satellites: 0, grid: 0, heatmap: 0 },
   setEntityCount: (l, n) =>
     set((state) => ({ entityCounts: { ...state.entityCounts, [l]: n } })),
 
-  lastUpdated: { flights: null, ships: null, satellites: null },
+  lastUpdated: { flights: null, ships: null, satellites: null, grid: null, heatmap: null },
   setLastUpdated: (l, t) =>
     set((state) => ({ lastUpdated: { ...state.lastUpdated, [l]: t } })),
 
@@ -100,4 +122,25 @@ export const useOverwatchStore = create<OverwatchStore>((set) => ({
     })),
   dismissAlert: (id) =>
     set((state) => ({ alerts: state.alerts.filter((a) => a.id !== id) })),
+
+  showCheatsheet: false,
+  toggleCheatsheet: () => set((state) => ({ showCheatsheet: !state.showCheatsheet })),
+
+  showSearch: false,
+  setShowSearch: (v) => set({ showSearch: v }),
+
+  entityIndex: [],
+  updateEntityIndex: (type, entries) =>
+    set((state) => ({
+      entityIndex: [
+        ...state.entityIndex.filter((e) => e.type !== type),
+        ...entries,
+      ],
+    })),
+
+  followEntityId: null,
+  setFollowEntity: (id) => set({ followEntityId: id }),
+
+  showMinimap: true,
+  toggleMinimap: () => set((state) => ({ showMinimap: !state.showMinimap })),
 }))

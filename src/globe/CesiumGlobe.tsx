@@ -5,12 +5,16 @@ import { useCesiumViewer } from './useCesiumViewer'
 import { useAutoRotate } from './useAutoRotate'
 import { useMouseCoordinates } from './useMouseCoordinates'
 import { useEntityPicker } from '../hooks/useEntityPicker'
+import { useCoordinateGrid } from '../hooks/useCoordinateGrid'
+import { useFollowCamera } from '../hooks/useFollowCamera'
+import { useOverwatchStore } from '../store/useOverwatchStore'
 import styles from './CesiumGlobe.module.css'
 
 export function CesiumGlobe() {
   const containerRef = useRef<HTMLDivElement>(null)
   const viewerRef = useContext(CesiumContext)
   const [viewer, setViewer] = useState<Cesium.Viewer | null>(null)
+  const gridEnabled = useOverwatchStore((s) => s.layers.grid)
 
   if (!viewerRef) throw new Error('CesiumGlobe must be inside CesiumContext.Provider')
 
@@ -20,6 +24,8 @@ export function CesiumGlobe() {
   useAutoRotate(viewer)
   useMouseCoordinates(viewer)
   useEntityPicker(viewer)
+  useCoordinateGrid(viewer, gridEnabled)
+  useFollowCamera(viewer)
 
   return <div ref={containerRef} className={styles.container} />
 }

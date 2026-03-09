@@ -6,6 +6,8 @@ const LAYERS = [
   { key: 'flights' as const, label: 'FLIGHTS', shortcut: 'F' },
   { key: 'ships' as const, label: 'SHIPS', shortcut: 'S' },
   { key: 'satellites' as const, label: 'SATS', shortcut: 'T' },
+  { key: 'grid' as const, label: 'GRID', shortcut: 'G' },
+  { key: 'heatmap' as const, label: 'HEAT', shortcut: 'H' },
 ]
 
 export function LayerToggles() {

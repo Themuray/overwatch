@@ -1,0 +1,79 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  display: flex;
+  justify-content: center;
+  padding-top: 80px;
+  pointer-events: auto;
+}
+
+.container {
+  width: 400px;
+  max-width: 90vw;
+}
+
+.input {
+  width: 100%;
+  padding: 10px 14px;
+  background: rgba(6, 6, 8, 0.92);
+  border: 1px solid var(--color-amber);
+  color: var(--color-amber);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  outline: none;
+  box-shadow: 0 0 12px rgba(255, 176, 0, 0.15);
+}
+
+.input::placeholder {
+  color: var(--color-amber-dim);
+  opacity: 0.5;
+}
+
+.results {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  background: rgba(6, 6, 8, 0.95);
+  border: 1px solid var(--color-border);
+  border-top: none;
+}
+
+.result {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.result:hover,
+.result.active {
+  background: rgba(255, 176, 0, 0.08);
+}
+
+.typeBadge {
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  min-width: 30px;
+}
+
+.name {
+  font-size: 12px;
+  color: var(--color-amber);
+  letter-spacing: 0.05em;
+}
+
+.noResults {
+  padding: 12px 14px;
+  background: rgba(6, 6, 8, 0.95);
+  border: 1px solid var(--color-border);
+  border-top: none;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  color: var(--color-amber-dim);
+  opacity: 0.5;
+  text-align: center;
+}

@@ -59,7 +59,7 @@ Two picking paths in `useEntityPicker` (`src/hooks/useEntityPicker.ts`):
 |---|---|---|
 | OpenSky flights | `src/services/opensky.ts` | Poll every 30 s |
 | Celestrak TLEs | `src/services/celestrak.ts` | TLE re-fetch every 5 min, position propagated every 5 s via satellite.js |
-| Simulated AIS | `src/services/ships.ts` | Update every 15 s |
+| Digitraffic AIS | `src/services/ships.ts` | Poll every 60 s (real Baltic Sea AIS via meri.digitraffic.fi) |
 
 **TLE API:** Use `https://tle.ivanstanojevic.me/api/tle/{noradId}` (CORS `*`, HTTP/2). `https://celestrak.org/pub/TLE/*` returns 403. Fetched in batches of 15 with 300 ms delay between batches.
 
@@ -72,4 +72,4 @@ Two picking paths in `useEntityPicker` (`src/hooks/useEntityPicker.ts`):
 
 ### Keyboard shortcuts
 
-`F` flights · `S` ships · `T` satellites · `R` reset camera · `Space` toggle auto-rotate · `ESC` deselect · `Z` fly to selected
+`F` flights · `S` ships · `T` satellites · `G` grid · `H` heatmap · `M` minimap · `R` reset camera · `L` follow entity · `Z` fly to selected · `P` screenshot · `/` search · `?` cheatsheet · `+`/`=` zoom in · `-` zoom out · `Space` toggle auto-rotate · `ESC` deselect/close

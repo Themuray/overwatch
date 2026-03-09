@@ -18,8 +18,11 @@ export function EntityInspector() {
   const selectedEntityId = useOverwatchStore((s) => s.selectedEntityId)
   const selectedEntityInfo = useOverwatchStore((s) => s.selectedEntityInfo)
   const setSelectedEntity = useOverwatchStore((s) => s.setSelectedEntity)
+  const followEntityId = useOverwatchStore((s) => s.followEntityId)
+  const setFollowEntity = useOverwatchStore((s) => s.setFollowEntity)
 
   const isOpen = selectedEntityId !== null
+  const isFollowing = followEntityId === selectedEntityId && selectedEntityId !== null
 
   return (
     <div className={`${styles.panel} ${isOpen ? styles.open : ''}`}>
@@ -43,16 +46,25 @@ export function EntityInspector() {
       <div className={styles.separator} />
 
       {selectedEntityInfo ? (
-        <table className={styles.detailTable}>
-          <tbody>
-            {selectedEntityInfo.details.map(({ label, value }) => (
-              <tr key={label}>
-                <td className={styles.detailLabel}>{label}</td>
-                <td className={styles.detailValue}>{value}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <>
+          <table className={styles.detailTable}>
+            <tbody>
+              {selectedEntityInfo.details.map(({ label, value }) => (
+                <tr key={label}>
+                  <td className={styles.detailLabel}>{label}</td>
+                  <td className={styles.detailValue}>{value}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <div className={styles.separator} />
+          <button
+            className={`${styles.followBtn} ${isFollowing ? styles.followActive : ''}`}
+            onClick={() => setFollowEntity(isFollowing ? null : selectedEntityId)}
+          >
+            {isFollowing ? 'FOLLOWING' : 'FOLLOW [L]'}
+          </button>
+        </>
       ) : (
         <div className={styles.placeholder}>
           <span className={styles.placeholderText}>CLICK AN ENTITY TO INSPECT</span>

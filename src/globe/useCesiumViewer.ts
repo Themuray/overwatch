@@ -43,6 +43,7 @@ export function useCesiumViewer(
       timeline: false,
       navigationHelpButton: false,
       creditContainer: creditDiv,
+      contextOptions: { webgl: { preserveDrawingBuffer: true } },
     })
 
     viewer.scene.backgroundColor = Cesium.Color.BLACK

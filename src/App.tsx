@@ -8,11 +8,17 @@ import { LeftPanel } from './hud/LeftPanel/LeftPanel'
 import { LayerToggles } from './hud/LayerToggles/LayerToggles'
 import { EntityInspector } from './hud/EntityInspector/EntityInspector'
 import { Alerts } from './hud/Alerts/Alerts'
+import { ZoomControls } from './hud/ZoomControls/ZoomControls'
+import { ShortcutCheatsheet } from './hud/ShortcutCheatsheet/ShortcutCheatsheet'
+import { SearchBar } from './hud/SearchBar/SearchBar'
+import { Minimap } from './hud/Minimap/Minimap'
 import { FlightLayer } from './layers/FlightLayer'
 import { SatelliteLayer } from './layers/SatelliteLayer'
 import { ShipLayer } from './layers/ShipLayer'
+import { HeatmapLayer } from './layers/HeatmapLayer'
 import { useOverwatchStore } from './store/useOverwatchStore'
 import { INITIAL_DESTINATION, INITIAL_ORIENTATION } from './globe/useCesiumViewer'
+import { captureScreenshot } from './hooks/useScreenshot'
 import styles from './App.module.css'
 
 function KeyboardShortcuts() {
@@ -21,7 +27,15 @@ function KeyboardShortcuts() {
   const isAutoRotating = useOverwatchStore((s) => s.isAutoRotating)
   const setAutoRotating = useOverwatchStore((s) => s.setAutoRotating)
   const setSelectedEntity = useOverwatchStore((s) => s.setSelectedEntity)
+  const selectedEntityId = useOverwatchStore((s) => s.selectedEntityId)
   const selectedEntityInfo = useOverwatchStore((s) => s.selectedEntityInfo)
+  const toggleCheatsheet = useOverwatchStore((s) => s.toggleCheatsheet)
+  const setShowSearch = useOverwatchStore((s) => s.setShowSearch)
+  const showSearch = useOverwatchStore((s) => s.showSearch)
+  const showCheatsheet = useOverwatchStore((s) => s.showCheatsheet)
+  const followEntityId = useOverwatchStore((s) => s.followEntityId)
+  const setFollowEntity = useOverwatchStore((s) => s.setFollowEntity)
+  const toggleMinimap = useOverwatchStore((s) => s.toggleMinimap)
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -37,6 +51,15 @@ function KeyboardShortcuts() {
         case 't': case 'T':
           toggleLayer('satellites')
           break
+        case 'g': case 'G':
+          toggleLayer('grid')
+          break
+        case 'h': case 'H':
+          toggleLayer('heatmap')
+          break
+        case 'm': case 'M':
+          toggleMinimap()
+          break
         case 'r': case 'R': {
           const viewer = viewerRef?.current
           if (viewer) {
@@ -48,12 +71,31 @@ function KeyboardShortcuts() {
           }
           break
         }
+        case 'l': case 'L':
+          if (followEntityId) {
+            setFollowEntity(null)
+          } else if (selectedEntityId) {
+            setFollowEntity(selectedEntityId)
+          }
+          break
+        case 'p': case 'P': {
+          const viewer = viewerRef?.current
+          if (viewer) captureScreenshot(viewer)
+          break
+        }
         case ' ':
           e.preventDefault()
           setAutoRotating(!isAutoRotating)
           break
         case 'Escape':
-          setSelectedEntity(null, null)
+          if (showSearch) {
+            setShowSearch(false)
+          } else if (showCheatsheet) {
+            toggleCheatsheet()
+          } else {
+            setFollowEntity(null)
+            setSelectedEntity(null, null)
+          }
           break
         case 'z': case 'Z': {
           const viewer = viewerRef?.current
@@ -67,12 +109,35 @@ function KeyboardShortcuts() {
           }
           break
         }
+        case '/':
+          e.preventDefault()
+          setShowSearch(true)
+          break
+        case '?':
+          toggleCheatsheet()
+          break
+        case '+': case '=': {
+          const viewer = viewerRef?.current
+          if (viewer) {
+            const height = viewer.camera.positionCartographic.height
+            viewer.camera.zoomIn(height * 0.3)
+          }
+          break
+        }
+        case '-': {
+          const viewer = viewerRef?.current
+          if (viewer) {
+            const height = viewer.camera.positionCartographic.height
+            viewer.camera.zoomOut(height * 0.3)
+          }
+          break
+        }
       }
     }
 
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [toggleLayer, isAutoRotating, setAutoRotating, setSelectedEntity, selectedEntityInfo, viewerRef])
+  }, [toggleLayer, isAutoRotating, setAutoRotating, setSelectedEntity, selectedEntityId, selectedEntityInfo, viewerRef, toggleCheatsheet, setShowSearch, showSearch, showCheatsheet, followEntityId, setFollowEntity, toggleMinimap])
 
   return null
 }
@@ -91,6 +156,7 @@ export function App() {
         <FlightLayer />
         <SatelliteLayer />
         <ShipLayer />
+        <HeatmapLayer />
 
         <div className={styles.vignette} />
         <div className={styles.scanlines} />
@@ -106,10 +172,14 @@ export function App() {
             </div>
             <div className={styles.hudRight}>
               <EntityInspector />
+              <ZoomControls />
             </div>
           </div>
           <BottomBar />
+          <Minimap />
         </div>
+        <SearchBar />
+        <ShortcutCheatsheet />
         <KeyboardShortcuts />
       </div>
     </CesiumContext.Provider>
