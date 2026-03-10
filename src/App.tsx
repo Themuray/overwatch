@@ -22,6 +22,7 @@ import { StormLayer } from './layers/StormLayer'
 import { AirportLayer } from './layers/AirportLayer'
 import { PowerPlantLayer } from './layers/PowerPlantLayer'
 import { BuoyLayer } from './layers/BuoyLayer'
+import { FlightRouteOverlay } from './layers/FlightRouteOverlay'
 import { useOverwatchStore } from './store/useOverwatchStore'
 import { INITIAL_DESTINATION, INITIAL_ORIENTATION } from './globe/useCesiumViewer'
 import { captureScreenshot } from './hooks/useScreenshot'
@@ -187,6 +188,7 @@ export function App() {
         <AirportLayer />
         <PowerPlantLayer />
         <BuoyLayer />
+        <FlightRouteOverlay />
 
         <div className={styles.vignette} />
         <div className={styles.scanlines} />

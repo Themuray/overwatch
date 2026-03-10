@@ -19,6 +19,12 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api\/nhc/, ''),
       },
+      // GDACS tropical cyclone data (no CORS headers on origin)
+      '/api/gdacs': {
+        target: 'https://www.gdacs.org',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/gdacs/, ''),
+      },
     },
   },
 })

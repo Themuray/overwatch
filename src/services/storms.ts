@@ -1,57 +1,65 @@
-// NOAA National Hurricane Center — active storm data
-// Uses the NHC GIS data feed for active tropical cyclones (Atlantic + Pacific)
-
-export interface StormPosition {
-  longitude: number
-  latitude: number
-}
+// GDACS — Global Disaster Alert and Coordination System
+// Tropical cyclone data from JTWC + NHC via GDACS GeoJSON feed.
+// Proxied via Vite dev server for CORS.
 
 export interface StormState {
   id: string
   name: string
-  stormType: string        // 'Tropical Storm', 'Hurricane', 'Tropical Depression'
+  stormType: string        // e.g. 'Tropical Storm', 'Typhoon', 'Hurricane'
   wind: number             // max sustained wind in knots
-  pressure: number         // central pressure in mb
-  movement: string         // e.g. "NW at 12 mph"
+  pressure: number         // central pressure in mb (not available from GDACS list)
+  movement: string         // not available from GDACS list endpoint
   currentLon: number
   currentLat: number
-  forecastTrack: StormPosition[]
+  alertLevel: string       // 'Green' | 'Orange' | 'Red'
+}
+
+function parseStormType(severityText: string): string {
+  const text = severityText.toLowerCase()
+  if (text.includes('super typhoon')) return 'Super Typhoon'
+  if (text.includes('typhoon')) return 'Typhoon'
+  if (text.includes('hurricane')) return 'Hurricane'
+  if (text.includes('tropical storm')) return 'Tropical Storm'
+  if (text.includes('tropical depression')) return 'Tropical Depression'
+  if (text.includes('subtropical')) return 'Subtropical Storm'
+  return 'Tropical Cyclone'
 }
 
 export async function fetchStorms(): Promise<StormState[]> {
-  // NHC CurrentSummary gives active storms in JSON
-  const res = await fetch('/api/nhc/CurrentSummary.json', {
-    signal: AbortSignal.timeout(15000),
-  })
-  if (!res.ok) throw new Error(`NHC API error: ${res.status}`)
+  const res = await fetch(
+    '/api/gdacs/gdacsapi/api/events/geteventlist/MAP?eventlist=TC',
+    { signal: AbortSignal.timeout(15000) },
+  )
+  if (!res.ok) throw new Error(`GDACS API error: ${res.status}`)
   const data = await res.json()
 
   const storms: StormState[] = []
-  const activeStorms = data.activeStorms ?? []
 
-  for (const s of activeStorms) {
-    const id = s.id ?? s.binNumber ?? ''
-    const name = s.name ?? 'UNNAMED'
-    const classification = s.classification ?? 'Tropical Storm'
+  for (const feature of data.features ?? []) {
+    const p = feature.properties
+    // Only take the centroid (current position) feature per storm
+    if (p.eventtype !== 'TC' || p.Class !== 'Point_Centroid') continue
+    // Skip storms that have already dissipated (iscurrent=false)
+    if (p.iscurrent === 'false') continue
 
-    // Parse movement info
-    const movementDir = s.movementDir ?? ''
-    const movementSpeed = s.movementSpeed ?? 0
-    const movement = movementDir && movementSpeed
-      ? `${movementDir} at ${movementSpeed} mph`
-      : '—'
+    const [lon, lat] = feature.geometry?.coordinates ?? [0, 0]
+
+    // Wind speed from GDACS is in km/h — convert to knots
+    const windKph: number = p.severitydata?.severity ?? 0
+    const windKt = Math.round(windKph / 1.852)
 
     storms.push({
-      id,
-      name: name.toUpperCase(),
-      stormType: classification,
-      wind: s.intensity ?? 0,
-      pressure: s.pressure ?? 0,
-      movement,
-      currentLon: s.longitude ?? s.lon ?? 0,
-      currentLat: s.latitude ?? s.lat ?? 0,
-      forecastTrack: [],  // forecast cone requires parsing KML/GeoJSON — skip for now
+      id: String(p.eventid),
+      name: (p.eventname ?? 'UNNAMED').toUpperCase(),
+      stormType: parseStormType(p.severitydata?.severitytext ?? ''),
+      wind: windKt,
+      pressure: 0,   // not available from list endpoint
+      movement: '—', // not available from list endpoint
+      currentLon: lon,
+      currentLat: lat,
+      alertLevel: p.alertlevel ?? 'Green',
     })
   }
+
   return storms
 }

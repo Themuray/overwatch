@@ -64,13 +64,14 @@ Two picking paths in `useEntityPicker` (`src/hooks/useEntityPicker.ts`):
 | Digitraffic AIS | `src/services/ships.ts` | Poll 60 s | None |
 | USGS earthquakes | `src/services/earthquakes.ts` | Poll 5 min | None |
 | NASA FIRMS fires | `src/services/fires.ts` | Poll 10 min | `VITE_NASA_FIRMS_KEY` |
-| NOAA NHC storms | `src/services/storms.ts` | Poll 15 min | None (proxied) |
+| GDACS cyclones | `src/services/storms.ts` | Poll 15 min | None (proxied) |
 | OurAirports | `src/services/airports.ts` | Static (fetch once) | None |
 | WRI power plants | `src/services/powerplants.ts` | Static (fetch once) | None |
 | NOAA buoys | `src/services/buoys.ts` | Poll 10 min | None (proxied) |
 
 **CORS proxies** (dev only, configured in `vite.config.ts`):
 - `/api/nhc` → `https://www.nhc.noaa.gov`
+- `/api/gdacs` → `https://www.gdacs.org`
 - `/api/ndbc` → `https://www.ndbc.noaa.gov`
 
 **TLE API:** Use `https://tle.ivanstanojevic.me/api/tle/{noradId}` (CORS `*`, HTTP/2). `https://celestrak.org/pub/TLE/*` returns 403. Fetched in batches of 15 with 300 ms delay between batches.
