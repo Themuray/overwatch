@@ -4,5 +4,27 @@ import cesium from 'vite-plugin-cesium'
 
 export default defineConfig({
   plugins: [react(), cesium()],
-  define: { global: 'globalThis' }
+  define: { global: 'globalThis' },
+  server: {
+    proxy: {
+      // NOAA NDBC buoy data (no CORS headers on origin)
+      '/api/ndbc': {
+        target: 'https://www.ndbc.noaa.gov',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/ndbc/, ''),
+      },
+      // NOAA NHC storm data (no CORS headers on origin)
+      '/api/nhc': {
+        target: 'https://www.nhc.noaa.gov',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/nhc/, ''),
+      },
+      // GDACS tropical cyclone data (no CORS headers on origin)
+      '/api/gdacs': {
+        target: 'https://www.gdacs.org',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/gdacs/, ''),
+      },
+    },
+  },
 })

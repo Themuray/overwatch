@@ -3,16 +3,16 @@ import * as Cesium from 'cesium'
 import { CesiumContext } from '../globe/CesiumContext'
 import { useOverwatchStore } from '../store/useOverwatchStore'
 import { fetchFlights, type FlightState } from '../services/opensky'
+import { FLIGHT_ICON, FLIGHT_ICON_SELECTED } from '../assets/icons'
+import { evaluateAlertRules } from '../services/alertRules'
 import type { FlightPickData } from '../types'
 
 const POLL_INTERVAL_MS = 30_000
-const TRAIL_MAX_POSITIONS = 6   // ~3 minutes of history at 30s intervals
-const FLIGHT_COLOR = Cesium.Color.fromCssColorString('#00D4FF').withAlpha(0.9)
+const TRAIL_MAX_POSITIONS = 20   // ~10 minutes of history at 30s intervals
 const LABEL_COLOR = Cesium.Color.fromCssColorString('#00D4FF').withAlpha(0.75)
 const TRAIL_COLOR = Cesium.Color.fromCssColorString('#00D4FF').withAlpha(0.25)
-const SELECTED_COLOR = Cesium.Color.fromCssColorString('#FFB000').withAlpha(1.0)
 
-/** Build the pick data stored on each PointPrimitive */
+/** Build the pick data stored on each Billboard */
 function makePickData(f: FlightState, pos: Cesium.Cartesian3): FlightPickData {
   return {
     _pickType: 'flight',
@@ -42,8 +42,9 @@ export function FlightLayer() {
   const setEntityCount = useOverwatchStore((s) => s.setEntityCount)
   const setLastUpdated = useOverwatchStore((s) => s.setLastUpdated)
   const addAlert = useOverwatchStore((s) => s.addAlert)
+  const updateEntityIndex = useOverwatchStore((s) => s.updateEntityIndex)
 
-  const pointsRef = useRef<Cesium.PointPrimitiveCollection | null>(null)
+  const billboardsRef = useRef<Cesium.BillboardCollection | null>(null)
   const labelsRef = useRef<Cesium.LabelCollection | null>(null)
   const trailsRef = useRef<Cesium.PolylineCollection | null>(null)
   const trailHistoryRef = useRef<Map<string, Cesium.Cartesian3[]>>(new Map())
@@ -52,14 +53,15 @@ export function FlightLayer() {
 
   // Highlight selected flight
   useEffect(() => {
-    const points = pointsRef.current
-    if (!points) return
-    for (let i = 0; i < points.length; i++) {
-      const p = points.get(i)
-      const data = p.id as FlightPickData | undefined
+    const billboards = billboardsRef.current
+    if (!billboards) return
+    for (let i = 0; i < billboards.length; i++) {
+      const b = billboards.get(i)
+      const data = b.id as FlightPickData | undefined
       if (!data) continue
-      p.color = data.entityId === selectedEntityId ? SELECTED_COLOR : FLIGHT_COLOR
-      p.pixelSize = data.entityId === selectedEntityId ? 7 : 4
+      const isSelected = data.entityId === selectedEntityId
+      b.image = isSelected ? FLIGHT_ICON_SELECTED : FLIGHT_ICON
+      b.scale = isSelected ? 0.6 : 0.4
     }
   }, [selectedEntityId])
 
@@ -68,29 +70,29 @@ export function FlightLayer() {
     if (!viewerReady || !viewerRef?.current) return
     const scene = viewerRef.current.scene
 
-    const points = new Cesium.PointPrimitiveCollection()
-    const labels = new Cesium.LabelCollection()
+    const billboards = new Cesium.BillboardCollection({ scene })
+    const labels = new Cesium.LabelCollection({ scene })
     const trails = new Cesium.PolylineCollection()
 
-    points.show = flightsEnabled
+    billboards.show = flightsEnabled
     labels.show = flightsEnabled
     trails.show = flightsEnabled
 
-    scene.primitives.add(trails)  // trails behind points
-    scene.primitives.add(points)
+    scene.primitives.add(trails)  // trails behind billboards
+    scene.primitives.add(billboards)
     scene.primitives.add(labels)
 
-    pointsRef.current = points
+    billboardsRef.current = billboards
     labelsRef.current = labels
     trailsRef.current = trails
 
     return () => {
       if (!scene.isDestroyed()) {
         scene.primitives.remove(trails)
-        scene.primitives.remove(points)
+        scene.primitives.remove(billboards)
         scene.primitives.remove(labels)
       }
-      pointsRef.current = null
+      billboardsRef.current = null
       labelsRef.current = null
       trailsRef.current = null
       trailHistoryRef.current.clear()
@@ -100,7 +102,7 @@ export function FlightLayer() {
 
   // Toggle visibility
   useEffect(() => {
-    if (pointsRef.current) pointsRef.current.show = flightsEnabled
+    if (billboardsRef.current) billboardsRef.current.show = flightsEnabled
     if (labelsRef.current) labelsRef.current.show = flightsEnabled
     if (trailsRef.current) trailsRef.current.show = flightsEnabled
   }, [flightsEnabled])
@@ -116,10 +118,10 @@ export function FlightLayer() {
         const flights = await fetchFlights()
         if (cancelled) return
 
-        const points = pointsRef.current
+        const billboards = billboardsRef.current
         const labels = labelsRef.current
         const trails = trailsRef.current
-        if (!points || !labels || !trails) return
+        if (!billboards || !labels || !trails) return
 
         const history = trailHistoryRef.current
         const dataMap = flightDataRef.current
@@ -134,7 +136,7 @@ export function FlightLayer() {
         }
 
         // Rebuild collections
-        points.removeAll()
+        billboards.removeAll()
         labels.removeAll()
         trails.removeAll()
         dataMap.clear()
@@ -146,13 +148,14 @@ export function FlightLayer() {
 
           const isSelected = pickData.entityId === selectedEntityId
 
-          points.add({
+          billboards.add({
             position: pos,
-            color: isSelected ? SELECTED_COLOR : FLIGHT_COLOR,
-            pixelSize: isSelected ? 7 : 4,
-            outlineColor: Cesium.Color.fromCssColorString('#001122').withAlpha(0.5),
-            outlineWidth: 1,
+            image: isSelected ? FLIGHT_ICON_SELECTED : FLIGHT_ICON,
+            scale: isSelected ? 0.6 : 0.4,
+            rotation: -Cesium.Math.toRadians(f.heading ?? 0),
+            alignedAxis: Cesium.Cartesian3.UNIT_Z,
             id: pickData,
+            scaleByDistance: new Cesium.NearFarScalar(1_000_000, 1.0, 20_000_000, 0.3),
           })
 
           labels.add({
@@ -167,23 +170,22 @@ export function FlightLayer() {
             horizontalOrigin: Cesium.HorizontalOrigin.LEFT,
             verticalOrigin: Cesium.VerticalOrigin.CENTER,
             distanceDisplayCondition: new Cesium.DistanceDisplayCondition(0, 2_500_000),
-            disableDepthTestDistance: Number.POSITIVE_INFINITY,
             eyeOffset: new Cesium.Cartesian3(0, 0, -100),
           })
 
           // Trail
           const hist = history.get(f.icao24)
           if (hist && hist.length > 1) {
-            // Render segments with decreasing alpha for fade effect
             const segCount = hist.length - 1
             for (let i = 0; i < segCount; i++) {
-              const alpha = 0.08 + (i / segCount) * 0.22 // 0.08 → 0.30
+              const alpha = 0.08 + (i / segCount) * 0.22
               trails.add({
                 positions: [hist[i], hist[i + 1]],
                 width: 1,
                 material: Cesium.Material.fromType('Color', {
                   color: TRAIL_COLOR.withAlpha(alpha),
                 }),
+                distanceDisplayCondition: new Cesium.DistanceDisplayCondition(0, 5_000_000),
               })
             }
           }
@@ -191,6 +193,18 @@ export function FlightLayer() {
 
         setEntityCount('flights', flights.length)
         setLastUpdated('flights', Date.now())
+
+        // Update entity index for search
+        updateEntityIndex('flight', flights.map(f => ({
+          entityId: `flight-${f.icao24}`,
+          name: f.callsign || f.icao24,
+          type: 'flight',
+          position: { lon: f.longitude, lat: f.latitude, alt: f.baroAltitude },
+        })))
+
+        // Evaluate alert rules
+        evaluateAlertRules(flights, addAlert)
+
         if (flights.length > 0) addAlert(`FLIGHTS SYNCED — ${flights.length.toLocaleString()} TRACKED`, 'info')
       } catch (err) {
         addAlert('FLIGHT DATA FETCH FAILED', 'error')
@@ -210,7 +224,7 @@ export function FlightLayer() {
   // Clear when disabled
   useEffect(() => {
     if (!flightsEnabled) {
-      pointsRef.current?.removeAll()
+      billboardsRef.current?.removeAll()
       labelsRef.current?.removeAll()
       trailsRef.current?.removeAll()
       trailHistoryRef.current.clear()

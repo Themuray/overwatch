@@ -1,0 +1,86 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+}
+
+.panel {
+  position: relative;
+  background: rgba(6, 6, 8, 0.95);
+  border: 1px solid var(--color-border);
+  backdrop-filter: blur(8px);
+  padding: 20px 28px;
+  min-width: 340px;
+  max-width: 420px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.title {
+  font-size: 12px;
+  letter-spacing: 0.15em;
+  color: var(--color-amber);
+}
+
+.close {
+  background: none;
+  border: none;
+  color: var(--color-amber-dim);
+  cursor: pointer;
+  font-size: 12px;
+  font-family: var(--font-mono);
+  padding: 2px 4px;
+}
+
+.close:hover {
+  color: var(--color-amber);
+}
+
+.separator {
+  height: 1px;
+  background: var(--color-border);
+  margin: 10px 0;
+}
+
+.table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.table tr {
+  line-height: 2.2;
+}
+
+.keyCell {
+  padding-right: 16px;
+  white-space: nowrap;
+}
+
+.key {
+  display: inline-block;
+  min-width: 28px;
+  text-align: center;
+  padding: 1px 6px;
+  border: 1px solid var(--color-border);
+  background: rgba(255, 176, 0, 0.05);
+  color: var(--color-amber);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+}
+
+.descCell {
+  font-size: 11px;
+  color: var(--color-amber-dim);
+  letter-spacing: 0.05em;
+}

@@ -1,21 +1,38 @@
 .container {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 2px;
   pointer-events: auto;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.groupLabel {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  color: var(--color-amber-dim);
+  letter-spacing: 0.15em;
+  padding: 6px 12px 2px;
+  opacity: 0.6;
 }
 
 .btn {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 12px;
+  padding: 5px 12px;
   background: rgba(6, 6, 8, 0.75);
   border: 1px solid var(--color-border);
   backdrop-filter: blur(4px);
   cursor: pointer;
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 10px;
   color: var(--color-amber-dim);
   letter-spacing: 0.1em;
   transition: border-color 0.2s, color 0.2s;
@@ -34,7 +51,7 @@
 }
 
 .shortcut {
-  font-size: 9px;
+  font-size: 8px;
   color: var(--color-amber-dim);
   min-width: 3ch;
 }
@@ -49,8 +66,8 @@
 
 .offDot {
   display: inline-block;
-  width: 7px;
-  height: 7px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   background: var(--color-amber-dim);
   opacity: 0.4;
