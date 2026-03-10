@@ -6,7 +6,7 @@ interface Coordinates {
   alt: number | null
 }
 
-type LayerKey = 'flights' | 'ships' | 'satellites' | 'grid' | 'heatmap'
+type LayerKey = 'flights' | 'ships' | 'satellites' | 'grid' | 'heatmap' | 'earthquakes' | 'fires' | 'storms' | 'airports' | 'powerplants' | 'buoys'
 
 export interface EntityDetail {
   label: string
@@ -14,7 +14,7 @@ export interface EntityDetail {
 }
 
 export interface SelectedEntityInfo {
-  type: 'flight' | 'satellite' | 'ship'
+  type: 'flight' | 'satellite' | 'ship' | 'earthquake' | 'fire' | 'storm' | 'airport' | 'powerplant' | 'buoy'
   name: string
   details: EntityDetail[]
   /** Position for fly-to (lon/lat in degrees, alt in meters) */
@@ -90,15 +90,15 @@ export const useOverwatchStore = create<OverwatchStore>((set) => ({
   coordinates: { lat: null, lng: null, alt: null },
   setCoordinates: (c) => set({ coordinates: c }),
 
-  layers: { flights: false, ships: false, satellites: false, grid: false, heatmap: false },
+  layers: { flights: false, ships: false, satellites: false, grid: false, heatmap: false, earthquakes: false, fires: false, storms: false, airports: false, powerplants: false, buoys: false },
   toggleLayer: (l) =>
     set((state) => ({ layers: { ...state.layers, [l]: !state.layers[l] } })),
 
-  entityCounts: { flights: 0, ships: 0, satellites: 0, grid: 0, heatmap: 0 },
+  entityCounts: { flights: 0, ships: 0, satellites: 0, grid: 0, heatmap: 0, earthquakes: 0, fires: 0, storms: 0, airports: 0, powerplants: 0, buoys: 0 },
   setEntityCount: (l, n) =>
     set((state) => ({ entityCounts: { ...state.entityCounts, [l]: n } })),
 
-  lastUpdated: { flights: null, ships: null, satellites: null, grid: null, heatmap: null },
+  lastUpdated: { flights: null, ships: null, satellites: null, grid: null, heatmap: null, earthquakes: null, fires: null, storms: null, airports: null, powerplants: null, buoys: null },
   setLastUpdated: (l, t) =>
     set((state) => ({ lastUpdated: { ...state.lastUpdated, [l]: t } })),
 

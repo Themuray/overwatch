@@ -16,6 +16,12 @@ import { FlightLayer } from './layers/FlightLayer'
 import { SatelliteLayer } from './layers/SatelliteLayer'
 import { ShipLayer } from './layers/ShipLayer'
 import { HeatmapLayer } from './layers/HeatmapLayer'
+import { EarthquakeLayer } from './layers/EarthquakeLayer'
+import { FireLayer } from './layers/FireLayer'
+import { StormLayer } from './layers/StormLayer'
+import { AirportLayer } from './layers/AirportLayer'
+import { PowerPlantLayer } from './layers/PowerPlantLayer'
+import { BuoyLayer } from './layers/BuoyLayer'
 import { useOverwatchStore } from './store/useOverwatchStore'
 import { INITIAL_DESTINATION, INITIAL_ORIENTATION } from './globe/useCesiumViewer'
 import { captureScreenshot } from './hooks/useScreenshot'
@@ -50,6 +56,24 @@ function KeyboardShortcuts() {
           break
         case 't': case 'T':
           toggleLayer('satellites')
+          break
+        case 'e': case 'E':
+          toggleLayer('earthquakes')
+          break
+        case 'i': case 'I':
+          toggleLayer('fires')
+          break
+        case 'w': case 'W':
+          toggleLayer('storms')
+          break
+        case 'b': case 'B':
+          toggleLayer('buoys')
+          break
+        case 'a': case 'A':
+          toggleLayer('airports')
+          break
+        case 'n': case 'N':
+          toggleLayer('powerplants')
           break
         case 'g': case 'G':
           toggleLayer('grid')
@@ -157,6 +181,12 @@ export function App() {
         <SatelliteLayer />
         <ShipLayer />
         <HeatmapLayer />
+        <EarthquakeLayer />
+        <FireLayer />
+        <StormLayer />
+        <AirportLayer />
+        <PowerPlantLayer />
+        <BuoyLayer />
 
         <div className={styles.vignette} />
         <div className={styles.scanlines} />

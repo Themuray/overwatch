@@ -6,12 +6,24 @@ const TYPE_LABELS: Record<string, string> = {
   flight: 'AIRCRAFT',
   satellite: 'SATELLITE',
   ship: 'VESSEL',
+  earthquake: 'EARTHQUAKE',
+  fire: 'FIRE',
+  storm: 'STORM',
+  airport: 'AIRPORT',
+  powerplant: 'POWER PLANT',
+  buoy: 'BUOY',
 }
 
 const TYPE_COLORS: Record<string, string> = {
   flight: 'var(--color-cyan)',
   satellite: 'var(--color-green)',
   ship: 'var(--color-amber)',
+  earthquake: '#FF4444',
+  fire: '#FF6600',
+  storm: '#CC44FF',
+  airport: '#AABBCC',
+  powerplant: '#FF8800',
+  buoy: '#00CCAA',
 }
 
 export function EntityInspector() {
